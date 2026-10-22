@@ -57,7 +57,7 @@ Restrictions:
 Deliverables:
 - Attendance views and records.
 - Attendance summaries and reports defined in the SRS.
-- Attendance API routes, controllers, services, and data models.
+- Attendance API URLs, Django views, services, and models.
 - Input validation and authorization.
 - Unit and integration tests for attendance features.
 
@@ -78,7 +78,7 @@ Deliverables:
 - E-book and previous-year question paper listings.
 - Resource search and filtering.
 - Resource details and approved download/access functionality.
-- Library API routes, controllers, services, and data models.
+- Library API URLs, Django views, services, and models.
 - Input validation and tests.
 
 Must coordinate with:
@@ -98,7 +98,7 @@ Deliverables:
 - Event listing and details.
 - Event schedules and status.
 - Student event registration and participation status.
-- Event API routes, controllers, services, and data models.
+- Event API URLs, Django views, services, and models.
 - Validation, authorization, and tests.
 
 Must coordinate with:

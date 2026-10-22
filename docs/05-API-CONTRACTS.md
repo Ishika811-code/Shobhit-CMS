@@ -13,10 +13,10 @@ All frontend and backend teams must follow these contracts.
 - API style: REST.
 - Data format: JSON.
 - Base path: `/api/v1`.
-- Naming: lowercase plural nouns for collections.
+- Naming: lowercase nouns; use plural nouns for resource-list endpoints.
 - HTTP methods: GET, POST, PATCH, and DELETE as appropriate.
 - Dates: ISO 8601 format.
-- IDs: MongoDB ObjectId strings unless otherwise specified.
+- IDs: integer primary keys unless an endpoint explicitly documents another type.
 - Content type: `application/json` for JSON request bodies.
 - All protected endpoints require authentication.
 - The backend is responsible for validating inputs and enforcing permissions.
@@ -47,7 +47,7 @@ Example event list:
   "success": true,
   "data": [
     {
-      "_id": "68f000000000000000000001",
+      "id": 1,
       "title": "College Tech Fest",
       "date": "2026-11-10T09:00:00.000Z",
       "status": "upcoming"
@@ -127,7 +127,7 @@ Example response:
   "success": true,
   "data": {
     "user": {
-      "_id": "68f000000000000000000002",
+      "id": 1,
       "name": "Example Student",
       "email": "student@example.com",
       "role": "student"
@@ -319,7 +319,7 @@ Each module must:
 - Validate request parameters and body fields.
 - Enforce authentication and authorization.
 - Return the agreed response and error formats.
-- Use the shared error-handling middleware.
+- Use Django REST Framework serializers, permissions, and shared exception handling when DRF is adopted.
 - Avoid exposing internal database details.
 - Test successful and failure scenarios.
 - Document any new or changed endpoint.

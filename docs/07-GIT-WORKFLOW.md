@@ -38,7 +38,9 @@ Open a Pull Request on GitHub targeting `main`.
 
 ## 4. Pull Request Rules
 Before merging:
-- Ensure the application builds and relevant tests pass.
+- Ensure the React/Vite frontend builds and its relevant tests pass.
+- Ensure the Django system checks and relevant backend tests pass.
+- Review Django migrations and confirm they apply cleanly when backend models change.
 - Request a review from your team lead or designated reviewer.
 - Resolve review comments.
 - Confirm that shared code and API contracts remain compatible.

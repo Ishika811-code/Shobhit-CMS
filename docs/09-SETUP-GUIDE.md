@@ -4,17 +4,21 @@
 
 Install the following tools:
 
-- **Node.js:** LTS version
-- **npm:** Included with Node.js
-- **Git:** For version control
-- **MongoDB:** Local installation or MongoDB Atlas account
-- **VS Code:** Recommended editor
+- **Python:** A version supported by the selected Django release.
+- **pip:** Python package installer.
+- **Node.js and npm:** Required for the React/Vite frontend.
+- **MySQL Server:** A locally installed instance or an approved development database.
+- **Git:** For version control.
+- **VS Code:** Recommended editor.
 
 Verify installation:
 
 ```bash
-node -v
-npm -v
+python --version
+python -m pip --version
+node --version
+npm --version
+mysql --version
 git --version
 ```
 
@@ -39,12 +43,15 @@ Follow the naming rules in `07-GIT-WORKFLOW.md`.
 
 ## 4. Project Structure
 
-The project will use this structure:
+The target structure is:
 
 ```text
 college-cms/
 ├── client/          # React frontend
-├── server/          # Node.js + Express backend
+├── server/          # Django backend
+│   ├── manage.py
+│   ├── config/
+│   └── apps/
 ├── docs/            # Project documentation
 ├── .gitignore
 └── README.md
@@ -66,27 +73,49 @@ Open the local URL shown in your terminal.
 
 ## 6. Backend Setup
 
-Once the Express application has been initialized inside `server/`:
+Create and activate a virtual environment, then install the backend dependencies from the requirements file maintained by the Django team:
 
 ```bash
 cd server
-npm install
+python -m venv .venv
 ```
 
-Create a `.env` file inside `server/`:
+On Windows PowerShell:
 
-```env
-PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/college_cms
+```powershell
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-Then start the backend using the script configured in `server/package.json`, for example:
+On macOS/Linux:
 
 ```bash
-npm run dev
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-The exact command depends on the backend scripts configured by the team.
+Create a MySQL database and a least-privilege development user. Configure `server/.env` using the project's Django settings, for example:
+
+```env
+DJANGO_SECRET_KEY=replace-with-a-local-development-value
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DB_NAME=college_cms
+DB_USER=college_cms_user
+DB_PASSWORD=replace-with-local-password
+DB_HOST=127.0.0.1
+DB_PORT=3306
+```
+
+The exact variable names must match the settings implementation. Do not commit this file. Apply migrations and create a local admin account:
+
+```bash
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+The development API will be available at the address printed by Django, commonly `http://127.0.0.1:8000/`.
 
 ## 7. Environment Variables
 
@@ -109,11 +138,14 @@ Before starting work:
 
 ## 9. Troubleshooting
 
-- **Dependencies missing:** Run `npm install` in the relevant folder.
-- **MongoDB connection failed:** Check that MongoDB is running and `MONGODB_URI` is correct.
+- **Frontend dependencies missing:** Run `npm install` inside `client/`.
+- **Python dependencies missing:** Activate the virtual environment and install the backend requirements.
+- **MySQL connection failed:** Check that MySQL is running, the database/user exist, and the database environment variables match Django settings.
+- **Migration errors:** Check the configured database, review pending migrations with `python manage.py showmigrations`, and coordinate schema changes with the owning team.
 - **Port already in use:** Stop the other process or configure a different port.
 - **Merge conflicts:** Resolve them carefully, then test your changes.
-- **Missing scripts:** Check `package.json` before running commands.
+- **Missing frontend scripts:** Check `client/package.json` before running commands.
+- **Django command not found:** Confirm the virtual environment is active and dependencies are installed.
 
 ## 10. Important Rules
 

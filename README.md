@@ -2,7 +2,7 @@
 
 A centralized College Management System (CMS) designed to simplify academic activities, student services, and campus event management through a single web platform.
 
-The project is developed collaboratively by five teams using the **MERN stack**: MongoDB, Express.js, React.js, and Node.js.
+The project is developed collaboratively by five teams using **React** for the frontend, **Django** for the backend, and **MySQL** for the database.
 
 ---
 
@@ -20,16 +20,14 @@ The project is developed collaboratively by five teams using the **MERN stack**:
 
 | Technology | Purpose |
 |---|---|
-| React.js | Frontend user interface |
-| Node.js | Backend JavaScript runtime |
-| Express.js | REST API development |
-| MongoDB | Database |
-| Mongoose | MongoDB object modeling |
+| React.js with Vite | Frontend user interface and development/build tooling |
+| Django | Backend application and REST API |
+| Django ORM | Relational data access and schema migrations |
+| MySQL | Relational database |
 | Git and GitHub | Version control and collaboration |
-| JWT / secure session mechanism | Authentication |
+| Approved Django authentication mechanism | Authentication |
 | Tailwind CSS | Styling and responsive UI |
-| Postman | API testing |
-| Vite | React development server |
+| Django test framework and Vitest/React Testing Library | Backend and frontend testing |
 
 **Important:** The project lead must approve any change to the agreed technology stack before implementation.
 
@@ -45,7 +43,7 @@ Responsibilities:
 - Registration and login.
 - Logout and session/token handling.
 - Password hashing and validation.
-- Authentication middleware on protected backend routes.
+- Django authentication and permission checks on protected API operations.
 - Role-based authorization for student, faculty, and administrator accounts, as approved by the project lead.
 - Frontend login, registration, and authentication-related screens.
 - Error handling and authentication testing.
@@ -53,7 +51,7 @@ Responsibilities:
 Deliverables:
 - Authentication UI.
 - Authentication APIs.
-- User data model.
+- Django user model and migrations.
 - Authentication documentation and test cases.
 
 ### Team 2 — Dashboard and Navigation
@@ -283,45 +281,39 @@ college-cms/
 │       └── main.jsx
 │
 ├── server/
-│   └── src/
-│       ├── config/
-│       ├── middleware/
-│       ├── modules/
-│       │   ├── auth/
-│       │   ├── attendance/
-│       │   ├── library/
-│       │   └── events/
-│       ├── routes/
-│       ├── utils/
-│       ├── app.js
-│       └── server.js
+│   ├── manage.py
+│   ├── config/
+│   │   ├── settings.py
+│   │   └── urls.py
+│   └── apps/
+│       ├── auth/
+│       ├── attendance/
+│       ├── library/
+│       └── events/
 │
-├── docs/
-│   ├── SRS.md
-│   ├── API.md
-│   ├── DATABASE.md
-│   └── CONTRIBUTING.md
+├── docs/                  # Project standards and module contracts
 │
 ├── .gitignore
 ├── README.md
 └── package.json
 ```
 
-Each backend module should keep its own related routes, controllers, models, and validation logic together.
+Each Django app should keep its models, migrations, serializers, views, URLs, and tests together.
 
 For example:
 
 ```text
-server/src/modules/library/
-├── library.routes.js
-├── library.controller.js
-├── library.model.js
-└── library.validation.js
+server/apps/library/
+├── models.py
+├── serializers.py
+├── views.py
+├── urls.py
+└── tests.py
 ```
 
 Teams must not independently create duplicate shared components, authentication middleware, database connections, or global configurations. Shared changes require coordination with the project lead.
 
-The structure is the initial convention. Any change must be discussed and documented before teams adopt it.
+The structure is the target convention for the Django backend. Any change must be discussed and documented before teams adopt it.
 
 ---
 
@@ -338,24 +330,23 @@ The frontend and backend teams must agree on API contracts before parallel devel
 - Validate all incoming data on the server.
 - Protect restricted endpoints with authentication and authorization.
 - Keep business logic out of React components.
-- Document every endpoint in `docs/API.md`.
+- Follow and update `docs/05-API-CONTRACTS.md` for endpoint changes.
 
 ### Example API endpoints
 
 | Module | Method | Endpoint | Purpose |
 |---|---|---|---|
-| Authentication | POST | `/api/v1/auth/register` | Register a user |
 | Authentication | POST | `/api/v1/auth/login` | Log in |
 | Authentication | POST | `/api/v1/auth/logout` | Log out |
 | Attendance | GET | `/api/v1/attendance` | Retrieve authorized attendance records |
 | Attendance | POST | `/api/v1/attendance` | Create attendance records |
-| Library | GET | `/api/v1/library` | List or search resources |
-| Library | GET | `/api/v1/library/:id` | Retrieve a resource |
+| Library | GET | `/api/v1/library/resources` | List or search resources |
+| Library | GET | `/api/v1/library/resources/:id` | Retrieve a resource |
 | Events | GET | `/api/v1/events` | List events |
 | Events | POST | `/api/v1/events` | Create an event, subject to authorization |
-| Events | POST | `/api/v1/events/:id/register` | Register for an event |
+| Events | POST | `/api/v1/events/:id/registrations` | Register for an event |
 
-These endpoints are proposed examples. The project lead must confirm the final contracts, query parameters, payloads, permissions, and response schemas before implementation.
+These endpoints are proposed examples. The canonical endpoint details, permissions, and payloads are in `docs/05-API-CONTRACTS.md`; update that document with the affected teams before implementation.
 
 ### Standard response format
 
@@ -364,7 +355,6 @@ Success:
 ```json
 {
   "success": true,
-  "message": "Resources retrieved successfully",
   "data": []
 }
 ```
@@ -374,8 +364,11 @@ Error:
 ```json
 {
   "success": false,
-  "message": "Invalid request",
-  "errors": []
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request",
+    "details": []
+  }
 }
 ```
 
@@ -416,12 +409,12 @@ The agreed design theme is **black, white, and purple shades**.
 
 ### Backend standards
 
-- Keep routes, controllers, models, and validation separate.
-- Use `async/await` and centralized error handling.
-- Validate and sanitize incoming data appropriately.
+- Keep Django models, serializers, views, URLs, and tests organized by application.
+- Use Django's request/response and exception-handling conventions consistently.
+- Validate incoming data in serializers/forms and enforce permissions on the backend.
 - Apply least-privilege access control.
 - Never trust frontend validation alone.
-- Hash passwords using a suitable password-hashing algorithm.
+- Use Django's password hashing and authentication APIs; never store plaintext passwords.
 - Keep secrets in environment variables.
 
 ### Naming conventions
@@ -431,6 +424,7 @@ The agreed design theme is **black, white, and purple shades**.
 | React components | PascalCase | `EventCard.jsx` |
 | JavaScript functions | camelCase | `getAttendance()` |
 | Variables | camelCase | `studentName` |
+| Python functions and variables | snake_case | `get_attendance()` |
 | Constants | UPPER_SNAKE_CASE when appropriate | `API_BASE_URL` |
 | Database models | Consistent PascalCase | `LibraryResource` |
 | Branches | lowercase with hyphens | `feature/event-list` |
@@ -444,29 +438,34 @@ The agreed design theme is **black, white, and purple shades**.
 
 Install a compatible version of:
 
-- Node.js and npm.
+- Python and pip, for the selected Django release.
+- Node.js and npm, for the React/Vite frontend.
+- MySQL Server.
 - Git.
-- MongoDB or an approved MongoDB Atlas database.
 - A code editor such as VS Code.
-- Postman or another API testing tool.
+- Postman or another API testing tool, if useful for API development.
 
 ### Environment variables
 
 Each team must use local environment files rather than hardcoding secrets.
 
-Example backend `.env.example`:
+Example backend `.env.example` (variable names must match Django settings):
 
 ```dotenv
-PORT=5000
-MONGODB_URI=
-JWT_SECRET=
-CLIENT_URL=http://localhost:5173
+DJANGO_SECRET_KEY=replace-me-locally
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+DB_NAME=college_cms
+DB_USER=college_cms_user
+DB_PASSWORD=replace-me-locally
+DB_HOST=127.0.0.1
+DB_PORT=3306
 ```
 
 Example frontend `.env.example`:
 
 ```dotenv
-VITE_API_BASE_URL=http://localhost:5000/api/v1
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
 Create local `.env` files from the examples and fill in the values supplied through the approved project setup.
@@ -482,20 +481,35 @@ cd client
 npm install
 ```
 
-In a separate terminal:
+In a separate terminal, create and activate a virtual environment, then install the Django dependencies:
 
 ```bash
 cd server
-npm install
+python -m venv .venv
 ```
 
-Run the frontend and backend using their respective scripts defined in each `package.json`, for example:
+On Windows PowerShell, activate and install dependencies with:
+
+```powershell
+.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+On macOS/Linux:
 
 ```bash
-npm run dev
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-The command must be run in the relevant project directory and must exist in that package's scripts. MongoDB must also be configured and available.
+Create the MySQL database and local user, then apply migrations and start Django:
+
+```bash
+python manage.py migrate
+python manage.py runserver
+```
+
+Start the frontend in `client/` using `npm run dev`. Use the URL printed by Vite. Do not commit `.env` files or real credentials.
 
 ---
 
@@ -671,10 +685,16 @@ Maintain these files as the project develops:
 | File | Purpose |
 |---|---|
 | `README.md` | Project overview and collaboration instructions |
-| `docs/SRS.md` | Software Requirements Specification |
-| `docs/API.md` | API endpoints and request/response contracts |
-| `docs/DATABASE.md` | Database schemas and relationships |
-| `docs/CONTRIBUTING.md` | Detailed Git workflow and contribution rules |
+| `docs/01-PROJECT-OVERVIEW.md` | Scope, stack, and team ownership |
+| `docs/02-SRS.md` | Software Requirements Specification |
+| `docs/03-ARCHITECTURE.md` | React, Django, and MySQL architecture |
+| `docs/04-DESIGN-SYSTEM.md` | Shared UI and accessibility standards |
+| `docs/05-API-CONTRACTS.md` | API endpoints and request/response contracts |
+| `docs/06-DATABASE-SCHEMA.md` | MySQL relational schema and migrations |
+| `docs/07-GIT-WORKFLOW.md` | Branching and pull request rules |
+| `docs/08-TEAM-RESPONSIBILITIES.md` | Team ownership and collaboration |
+| `docs/09-SETUP-GUIDE.md` | Development environment setup |
+| `docs/10-DEFINITION-OF-DONE.md` | Completion and verification criteria |
 
 Each module team is responsible for updating the relevant API, schema, and testing documentation whenever its implementation changes.
 
@@ -715,9 +735,9 @@ All teams are accountable for the quality of their own modules and the successfu
 ---
 
 **Project:** College CMS  
-**Architecture:** MERN Stack  
-**Frontend:** React.js + Tailwind CSS  
-**Backend:** Node.js + Express.js  
-**Database:** MongoDB  
+**Architecture:** React + Django + MySQL
+**Frontend:** React.js + Vite + Tailwind CSS
+**Backend:** Django
+**Database:** MySQL
 **Collaboration:** Git + GitHub  
 **Project Lead:** Repository maintainer  

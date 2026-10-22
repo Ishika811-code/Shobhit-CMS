@@ -21,11 +21,11 @@ The project is developed collaboratively by five student teams using a common te
 |---|---|
 | Frontend | React.js with Vite |
 | Styling | Tailwind CSS |
-| Backend | Node.js and Express.js |
-| Database | MongoDB with Mongoose |
+| Backend | Django (Python) |
+| Database | MySQL with the Django ORM |
 | Version Control | Git and GitHub |
 | API Communication | REST API using JSON |
-| Testing | Vitest, React Testing Library, and Supertest |
+| Testing | Vitest, React Testing Library, and Django's test framework |
 | Collaboration | GitHub Issues, Pull Requests, and Project Board |
 
 All teams must follow the approved technology stack. Any proposed exception must be discussed with the project head before implementation.
@@ -108,8 +108,8 @@ Team leads are responsible for assigning tasks, helping team members, reporting 
 The project will be considered successful when:
 
 - All approved modules work within one application.
-- The frontend communicates correctly with the backend.
-- Data is stored and retrieved correctly from MongoDB.
+- The React frontend communicates correctly with the Django REST API.
+- Data is stored and retrieved correctly from MySQL through Django's ORM.
 - Authentication and authorization work as specified.
 - The interface follows the shared design system.
 - Critical user workflows pass integration testing.

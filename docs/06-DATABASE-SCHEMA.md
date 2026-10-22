@@ -2,296 +2,193 @@
 
 ## 1. Purpose
 
-This document defines the initial MongoDB database design for the College Management System (CMS).
+This document defines the proposed relational data model for the College Management System (CMS), including table ownership, relationships, constraints, indexing, and schema-change procedures.
 
-It establishes:
-- Collections and their ownership.
-- Document fields and data types.
-- Relationships between collections.
-- Validation and indexing rules.
-- Shared data ownership across teams.
-
-The schema must remain consistent with the approved SRS and API contracts.
-
-**Status:** Initial proposed schema. Team leads must review it before implementation.
+**Status:** Initial proposal. Confirm details against the approved SRS and Django implementation before production use.
 
 ## 2. Database Technology
 
-- Database: MongoDB
-- ODM: Mongoose
-- Database design: Document-oriented
-- Primary document identifier: MongoDB ObjectId
-- Date storage: BSON Date
-- Schema validation: Mongoose validation and appropriate database constraints
+- Database: MySQL
+- ORM and schema evolution: Django ORM and Django migrations
+- Primary keys: Django's configured integer primary key type (normally `BigAutoField`)
+- Date/time storage: timezone-aware Django `DateTimeField` values; use UTC in storage and ISO 8601 with timezone in API responses
+- Character encoding: `utf8mb4`
+- Integrity: enforce relationships and uniqueness in MySQL constraints as well as validating requests in Django
 
-Use environment variables for database connection configuration. Never commit credentials or production connection strings to GitHub.
+Configure the database through environment variables. Never commit database passwords, private connection strings, or production data.
 
-## 3. Collection Ownership
+## 3. Application and Table Ownership
 
-| Collection | Owner | Purpose |
+| Django app/table | Owner | Purpose |
 |---|---|---|
-| `users` | Authentication team | User identities and account status |
-| `attendanceRecords` | Attendance team | Attendance records |
-| `libraryResources` | Library team | E-books, PYQs, and academic resources |
-| `events` | Events team | College event information |
-| `eventRegistrations` | Events team | Student registrations for events |
+| `auth_user` or approved custom user table | Authentication team | User identity, login, and account status |
+| `attendance_record` | Attendance team | Attendance by student and session/course |
+| `library_resource` | Library team | Resource metadata and controlled file references |
+| `event` | Events team | Event information and registration rules |
+| `event_registration` | Events team | Student participation records |
 
-The Dashboard team primarily consumes data through APIs. It should not create duplicate collections for data owned by other modules.
+Use Django's built-in user model or an approved custom user model. If a custom model is required, decide and configure `AUTH_USER_MODEL` before the first migration. Other apps reference the configured user model with Django relations; they must not create a parallel identity table.
 
-## 4. Users Collection
+## 4. Users
 
-**Owner:** Authentication team.
+**Owner:** Authentication team. Django model: configured user model, optionally extended through a profile model when appropriate.
 
-Collection: `users`
+Recommended application fields:
 
-Purpose: Store the identity and account information shared across the application.
+| Field | Django type | Rules |
+|---|---|---|
+| `id` | `BigAutoField` | Primary key |
+| `name` | `CharField` or standard first/last name fields | Required display identity |
+| `email` | `EmailField` | Normalized and unique if email is the login identifier |
+| `password` | Django authentication field | Managed and hashed by Django authentication; never store raw passwords |
+| `role` | approved choices or Django Groups/Permissions | Enforced by backend authorization |
+| `is_active` | Django authentication field | Disabled users cannot authenticate |
+| `created_at`, `updated_at` | `DateTimeField` | Audit timestamps where required |
 
-### Proposed fields
+Do not return password fields or authentication secrets from APIs. Confirm whether role is represented by Django groups/permissions or a constrained role field; avoid duplicating both without a clear purpose.
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `_id` | ObjectId | Yes | Unique user identifier |
-| `name` | String | Yes | User's display name |
-| `email` | String | Yes | Unique normalized email |
-| `passwordHash` | String | Depends | Password hash if local password authentication is used |
-| `role` | String | Yes | `student`, `faculty`, or `admin` |
-| `status` | String | Yes | `active` or `disabled` |
-| `createdAt` | Date | Yes | Creation timestamp |
-| `updatedAt` | Date | Yes | Last modification timestamp |
+## 5. Attendance Records
 
-### Rules
+**Owner:** Attendance team. Django model: `AttendanceRecord`.
 
-- Normalize email addresses before storing them.
-- Enforce email uniqueness with a database unique index.
-- Never store plaintext passwords.
-- Never return `passwordHash` in API responses.
-- Validate roles on the backend.
-- A user ID is not proof of permission.
-- The authentication team owns changes to this schema.
+| Field | Django type | Rules |
+|---|---|---|
+| `id` | `BigAutoField` | Primary key |
+| `student` | `ForeignKey` to configured user model | Required; use an explicit related name |
+| `course_code` | `CharField` or relation to an approved course model | Required |
+| `session` | `ForeignKey` to an attendance-session model, if sessions are modeled | Recommended when multiple classes may occur per course/day |
+| `date` | `DateField` or `DateTimeField` | Required if session model is not used |
+| `status` | constrained choices | For example present, absent, or late if approved |
+| `marked_by` | nullable `ForeignKey` to configured user model | Set when the workflow records the faculty member |
+| `created_at`, `updated_at` | `DateTimeField` | Audit timestamps |
 
-If college IDs, departments, semesters, or other profile attributes are required, add them after confirming the SRS.
+Define the attendance session concept before enforcing uniqueness. Add a database unique constraint for one record per student/session (or the approved equivalent). Restrict reads and writes by authenticated identity and permission.
 
-## 5. Attendance Records Collection
+## 6. Library Resources
 
-**Owner:** Attendance team.
+**Owner:** Library team. Django model: `LibraryResource`.
 
-Collection: `attendanceRecords`
+| Field | Django type | Rules |
+|---|---|---|
+| `id` | `BigAutoField` | Primary key |
+| `title` | `CharField` | Required |
+| `description` | `TextField` | Optional |
+| `type` | constrained choices | For example ebook or pyq, subject to approved resource types |
+| `subject`, `course_code` | optional `CharField` or approved foreign keys | Filterable metadata |
+| `file` or `storage_key` | approved storage reference | Do not store large file contents in ordinary relational columns by default |
+| `uploaded_by` | `ForeignKey` to configured user model | Required where uploads are tracked |
+| `visibility` | constrained choices | Enforced by API permissions |
+| `created_at`, `updated_at` | `DateTimeField` | Audit timestamps |
 
-Purpose: Store attendance information for the approved attendance workflow.
+Keep file storage separate from MySQL unless explicitly approved. Validate type and size and authorize every download. Never expose storage credentials or unrestricted private file locations.
 
-### Proposed fields
+## 7. Events
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `_id` | ObjectId | Yes | Unique attendance record identifier |
-| `studentId` | ObjectId | Yes | Reference to `users._id` |
-| `courseCode` | String | Yes | Identifier for the course or subject |
-| `date` | Date | Yes | Date of the attendance session |
-| `status` | String | Yes | `present`, `absent`, or `late`, if supported |
-| `markedBy` | ObjectId | Depends | Reference to the faculty user who recorded attendance |
-| `createdAt` | Date | Yes | Creation timestamp |
-| `updatedAt` | Date | Yes | Last modification timestamp |
+**Owner:** Events team. Django model: `Event`.
 
-### Rules
+| Field | Django type | Rules |
+|---|---|---|
+| `id` | `BigAutoField` | Primary key |
+| `title` | `CharField` | Required |
+| `description` | `TextField` | Required |
+| `venue` | `CharField` | Optional if allowed by requirements |
+| `start_at`, `end_at` | `DateTimeField` | Required; end must be later than start |
+| `registration_deadline` | nullable `DateTimeField` | Optional rule |
+| `capacity` | nullable positive integer | Must be positive when specified |
+| `status` | constrained choices | For example draft, upcoming, ongoing, completed, cancelled |
+| `created_by` | `ForeignKey` to configured user model | Required |
+| `created_at`, `updated_at` | `DateTimeField` | Audit timestamps |
 
-- `studentId` must refer to an authorized student.
-- `markedBy` must refer to an authorized user when attendance is marked by faculty.
-- Only authorized users may create or modify attendance records.
-- Prevent duplicate records for the same student, course, and session.
-- Define what constitutes an attendance session before choosing the final uniqueness rule.
+Validate event rules in Django and use database constraints for rules that can be expressed reliably by MySQL. Registration eligibility must consider the current time and permissions, not only a stored status value.
 
-**Important:** If the college supports multiple classes for the same subject on the same day, introduce a separate `attendanceSessions` collection. Then attendance records should reference a session ID instead of relying on the date alone.
+## 8. Event Registrations
 
-## 6. Library Resources Collection
+**Owner:** Events team. Django model: `EventRegistration`.
 
-**Owner:** Library team.
+| Field | Django type | Rules |
+|---|---|---|
+| `id` | `BigAutoField` | Primary key |
+| `event` | `ForeignKey` to `Event` | Required |
+| `student` | `ForeignKey` to configured user model | Required |
+| `status` | constrained choices | For example registered or cancelled |
+| `registered_at`, `updated_at` | `DateTimeField` | Audit timestamps |
 
-Collection: `libraryResources`
+Add a `UniqueConstraint` for `(event, student)` if one row is retained per student/event, including cancellations. Choose another explicit model if multiple registration history rows are required. Enforce capacity inside a database transaction with appropriate locking/consistency behavior so concurrent requests cannot overbook an event.
 
-Purpose: Store metadata for academic resources.
-
-### Proposed fields
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `_id` | ObjectId | Yes | Unique resource identifier |
-| `title` | String | Yes | Resource title |
-| `description` | String | No | Resource description |
-| `type` | String | Yes | `ebook` or `pyq`, subject to approved resource types |
-| `subject` | String | No | Related subject |
-| `courseCode` | String | No | Related course |
-| `fileUrl` | String | Depends | Authorized file location or storage key |
-| `uploadedBy` | ObjectId | Yes | Reference to the uploading user |
-| `visibility` | String | Yes | Approved access policy |
-| `createdAt` | Date | Yes | Creation timestamp |
-| `updatedAt` | Date | Yes | Last modification timestamp |
-
-### Rules
-
-- Validate resource types and visibility values.
-- Restrict uploads and deletion to authorized users.
-- Do not store large files directly in ordinary resource documents unless that storage approach has been explicitly approved.
-- Use controlled file storage and authorized downloads for private resources.
-- Validate file type and size on the server.
-- A `fileUrl` must not expose credentials or provide unintended public access.
-
-The final schema must reflect whether students can upload resources or only administrators and faculty can do so.
-
-## 7. Events Collection
-
-**Owner:** Events team.
-
-Collection: `events`
-
-Purpose: Store college events and their registration rules.
-
-### Proposed fields
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `_id` | ObjectId | Yes | Unique event identifier |
-| `title` | String | Yes | Event name |
-| `description` | String | Yes | Event details |
-| `venue` | String | Depends | Event location |
-| `startAt` | Date | Yes | Event start time |
-| `endAt` | Date | Yes | Event end time |
-| `registrationDeadline` | Date | Depends | Last permitted registration time |
-| `capacity` | Number | Depends | Maximum participants |
-| `status` | String | Yes | `draft`, `upcoming`, `ongoing`, `completed`, or `cancelled` |
-| `createdBy` | ObjectId | Yes | Reference to the creator |
-| `createdAt` | Date | Yes | Creation timestamp |
-| `updatedAt` | Date | Yes | Last modification timestamp |
-
-### Rules
-
-- `endAt` must be later than `startAt`.
-- Capacity must be a positive integer when specified.
-- The backend must enforce registration deadlines and capacity.
-- Only authorized users may create, update, or cancel events.
-- Do not rely only on the event status stored in the database; registration eligibility must also consider the current time and other business rules.
-
-## 8. Event Registrations Collection
-
-**Owner:** Events team.
-
-Collection: `eventRegistrations`
-
-Purpose: Track which students register for which events.
-
-### Proposed fields
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `_id` | ObjectId | Yes | Unique registration identifier |
-| `eventId` | ObjectId | Yes | Reference to `events._id` |
-| `studentId` | ObjectId | Yes | Reference to `users._id` |
-| `status` | String | Yes | `registered`, `cancelled`, or another approved status |
-| `registeredAt` | Date | Yes | Registration timestamp |
-| `updatedAt` | Date | Yes | Last modification timestamp |
-
-### Rules
-
-- The event and student must exist.
-- Only authorized students can register themselves.
-- Prevent duplicate active registrations for the same event and student.
-- Enforce capacity and registration deadlines on the backend.
-- Define whether cancellation frees a place and whether re-registration is allowed.
-- Concurrent registration requests must not exceed event capacity.
-
-A unique compound index on `{ eventId, studentId }` is appropriate if one registration document is retained per student per event, including cancelled registrations. If the application permits multiple historical registration records, use a different explicitly designed constraint.
-
-## 9. Relationships Between Collections
+## 9. Relationships
 
 ```text
-users
- ├── attendanceRecords.studentId
- ├── attendanceRecords.markedBy
- ├── libraryResources.uploadedBy
- ├── events.createdBy
- └── eventRegistrations.studentId
+User
+ ├── AttendanceRecord.student
+ ├── AttendanceRecord.marked_by
+ ├── LibraryResource.uploaded_by
+ ├── Event.created_by
+ └── EventRegistration.student
 
-events
- └── eventRegistrations.eventId
+Event
+ └── EventRegistration.event
 ```
 
-These relationships use ObjectId references.
+Use Django `ForeignKey` fields and explicit `on_delete` behavior. Choose deletion policies deliberately; for records requiring history, prefer protected or nullable relationships over cascading deletion. Database foreign keys enforce referential integrity.
 
-MongoDB references do not automatically guarantee that the referenced document exists. The backend must validate references and handle deletion or deactivation according to the approved business rules.
+## 10. Constraints and Indexes
 
-## 10. Indexing Strategy
+Add indexes based on measured query patterns and endpoint filters. Initial candidates:
 
-Create indexes based on actual queries and uniqueness requirements.
-
-| Collection | Proposed index | Purpose |
+| Table | Constraint/index | Purpose |
 |---|---|---|
-| `users` | Unique `email` | Prevent duplicate accounts |
-| `attendanceRecords` | `{ studentId: 1, date: -1 }` | Retrieve student attendance by date |
-| `attendanceRecords` | `{ courseCode: 1, date: 1 }` | Retrieve course attendance |
-| `libraryResources` | `{ type: 1, createdAt: -1 }` | Filter and list resources |
-| `events` | `{ status: 1, startAt: 1 }` | Retrieve events by status and start time |
-| `eventRegistrations` | Unique `{ eventId: 1, studentId: 1 }` | Prevent duplicate registrations |
+| User | unique normalized email, if used for login | Prevent duplicate accounts |
+| AttendanceRecord | `(student_id, date)` or `(student_id, session_id)` | Retrieve a student's attendance |
+| AttendanceRecord | `(course_code, date)` or session relation | Retrieve course attendance |
+| LibraryResource | `(type, created_at)` | Filter and order resources |
+| Event | `(status, start_at)` | List events by status and time |
+| EventRegistration | unique `(event_id, student_id)` | Prevent duplicate active/retained registration |
 
-These are initial suggestions. Review query patterns before adding indexes. For attendance uniqueness, use the actual session identifier if attendance sessions are modeled separately.
+Declare application-owned indexes and uniqueness via Django `Meta.constraints` and `Meta.indexes` so they are represented in migrations. Review query plans and avoid redundant indexes.
 
-A normal index on a text field does not automatically provide efficient full-text search. Choose the search approach based on the expected search requirements.
+## 11. Validation and Data Integrity
 
-## 11. Data Validation Standards
-
-- Validate required fields and allowed values using Mongoose schemas.
-- Validate IDs before querying by them.
-- Reject invalid dates and impossible time ranges.
-- Enforce numeric limits such as positive event capacity.
-- Normalize values used for uniqueness.
-- Never trust role, student ID, or permission fields supplied by a client.
-- Use appropriate unique indexes for data-integrity constraints.
-- Return validation failures using the shared API error format.
-
-Application-level checks alone are not sufficient for uniqueness under concurrent requests. Use database constraints where applicable.
+- Validate field formats, allowed choices, and cross-field business rules in Django.
+- Use database constraints for uniqueness, required relationships, and supported checks.
+- Do not trust client-provided role, ownership, or permission fields.
+- Use transactions for multi-step state changes and concurrent capacity checks.
+- Return validation errors using the shared API error contract, without exposing SQL errors.
+- Back up and migrate existing data before destructive schema changes.
 
 ## 12. Database Ownership and Collaboration
 
-1. Each team owns its assigned collections and Mongoose models.
-2. Shared user identity fields are controlled by the Authentication team.
-3. Other teams reference the user ID instead of redefining the user model.
-4. Changes to shared fields must be discussed with affected teams.
-5. Schema changes that affect API consumers must update the API contracts.
-6. Every schema change must be reviewed, tested, and documented.
-7. Do not use production data in development without explicit authorization and appropriate safeguards.
+1. Each Django app owns its domain models and migrations.
+2. The authentication app owns the shared user model and identity fields.
+3. Other apps reference the configured user model instead of duplicating user data.
+4. Changes to shared relations or fields require review from affected teams.
+5. Schema changes that affect API consumers must update API contracts.
+6. Every migration must be reviewed and tested against a MySQL-compatible environment.
+7. Never use production personal data in development or tests without explicit authorization and safeguards.
 
 ## 13. Environment Configuration
 
-Example `.env.example` entry:
+Example `.env.example` values (placeholders only):
 
 ```dotenv
-MONGODB_URI=mongodb://127.0.0.1:27017/college_cms
+DB_NAME=college_cms
+DB_USER=college_cms_user
+DB_PASSWORD=change-me-locally
+DB_HOST=127.0.0.1
+DB_PORT=3306
 ```
 
-This is a local development example. Production environments must use appropriately secured connection details.
-
-The real `.env` file must be excluded from Git.
+The Django settings module should read these values without committing real credentials. Keep `.env` excluded from Git. Use separate least-privilege credentials per environment.
 
 ## 14. Schema Change Procedure
 
-Before changing a collection:
-
-1. Document the proposed change and its purpose.
-2. Identify affected endpoints, modules, and existing data.
-3. Get approval from the collection owner and affected teams.
-4. Update this document and the relevant API contracts.
-5. Implement schema validation and required indexes.
-6. Test both valid and invalid data.
-7. Provide a migration or backfill plan if existing records are affected.
-8. Merge only after review and successful tests.
+1. Document the change and affected modules, endpoints, and data.
+2. Obtain approval from the owning team and affected consumers.
+3. Update this document and API contracts as needed.
+4. Modify Django models and generate a migration; review the migration operations.
+5. Include a data migration or backfill plan when existing records require transformation.
+6. Test migrations from both an empty database and the prior supported schema where practical.
+7. Apply changes only through Django migrations; do not make undocumented manual production edits.
 
 ## 15. Finalization Checklist
 
-Before implementing these schemas, confirm:
-
-- The roles and profile fields required by the SRS.
-- Whether attendance needs a separate session model.
-- Who can upload library resources.
-- Whether library files are public or restricted.
-- Event capacity, cancellation, and re-registration rules.
-- The authentication mechanism and shared user identity model.
-
-The final schema must reflect approved requirements rather than assumptions in this initial proposal.
+Confirm the configured user model and role strategy, attendance session model and uniqueness rule, library file storage and visibility, event capacity/cancellation policy, MySQL version/engine settings, and any migration needed from existing data before production rollout.
