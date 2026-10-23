@@ -465,7 +465,7 @@ DB_PORT=3306
 Example frontend `.env.example`:
 
 ```dotenv
-VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
+VITE_API_BASE_URL=http://localhost:5000/api/v1
 ```
 
 Create local `.env` files from the examples and fill in the values supplied through the approved project setup.
@@ -481,35 +481,30 @@ cd client
 npm install
 ```
 
-In a separate terminal, create and activate a virtual environment, then install the Django dependencies:
+The current runnable API scaffold in `server/` uses Express, MongoDB, and JWT. This differs from the planned Django/MySQL architecture described above; the following commands run the current scaffold.
 
-```bash
-cd server
-python -m venv .venv
-```
-
-On Windows PowerShell, activate and install dependencies with:
+In a separate terminal, install the server dependencies and create a local environment file:
 
 ```powershell
-.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+cd server
+npm install
+Copy-Item .env.example .env
 ```
 
-On macOS/Linux:
+Set `MONGODB_URI` to a reachable MongoDB database. Replace the example `JWT_SECRET` with a securely generated random value of at least 32 characters. Start the API with:
+
+```powershell
+npm run dev
+```
+
+Start the frontend in a separate terminal:
 
 ```bash
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+cd client
+npm run dev
 ```
 
-Create the MySQL database and local user, then apply migrations and start Django:
-
-```bash
-python manage.py migrate
-python manage.py runserver
-```
-
-Start the frontend in `client/` using `npm run dev`. Use the URL printed by Vite. Do not commit `.env` files or real credentials.
+The Vite development server proxies `/api` requests to `http://localhost:5000`. Login requires an existing active MongoDB user with a bcrypt-hashed `passwordHash`; account provisioning is intentionally not exposed as a public API. Use the URL printed by Vite. Do not commit `.env` files or real credentials.
 
 ---
 

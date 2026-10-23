@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Icon } from "../../components/common/Icon";
 import { RoleTabs } from "../../components/common/RoleTabs";
 import { roles } from "../../utils/roles";
+import { clearAccessToken, login } from "../../services/auth";
 import "./login.css";
 import { UniversityIntro } from "./UniversityIntro";
 import { SupportCard } from "./SupportCard";
@@ -9,16 +10,38 @@ import { PageFooter } from "../../components/layout/PageFooter";
 
 function SignInForm({ activeRole }) {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState(null);
   const activeRoleLabel = roles.find((role) => role.id === activeRole)?.label;
-  const identifierLabel =
-    activeRole === "student"
-      ? "University ID / Enrollment Number"
-      : activeRole === "faculty"
-        ? "Faculty ID"
-        : "Staff ID";
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
+    setFeedback(null);
+    setIsSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    try {
+      const { user } = await login({
+        email: formData.get("email"),
+        password: formData.get("password"),
+      });
+      const expectedRole = activeRole === "staff" ? "admin" : activeRole;
+      if (user.role !== expectedRole) {
+        clearAccessToken();
+        throw new Error("This account does not have access to the selected portal.");
+      }
+      setFeedback({
+        status: "success",
+        message: `Signed in as ${user.name}.`,
+      });
+    } catch (error) {
+      setFeedback({
+        status: "error",
+        message: error instanceof Error ? error.message : "Unable to sign in.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -30,21 +53,18 @@ function SignInForm({ activeRole }) {
         </span>
       </div>
       <form onSubmit={handleSubmit}>
-        <label className="field-label" htmlFor="campus-id">
-          {identifierLabel}
+        <label className="field-label" htmlFor="campus-email">
+          University Email
         </label>
         <div className="input-wrap">
           <Icon name="id" />
           <input
             autoComplete="username"
-            id="campus-id"
-            name="campusId"
-            placeholder={
-              activeRole === "student"
-                ? "e.g. SHU-2024-CS089"
-                : `Enter your ${identifierLabel}`
-            }
+            id="campus-email"
+            name="email"
+            placeholder="name@shobhituniversity.ac.in"
             required
+            type="email"
           />
         </div>
 
@@ -76,10 +96,19 @@ function SignInForm({ activeRole }) {
             <Icon name={passwordVisible ? "eyeOff" : "eye"} />
           </button>
         </div>
-        <button className="submit-button" type="submit">
+        <button className="submit-button" disabled={isSubmitting} type="submit">
           <Icon name="login" />
-          <span>Sign In to Campus Portal</span>
+          <span>{isSubmitting ? "Signing In..." : "Sign In to Campus Portal"}</span>
         </button>
+        {feedback && (
+          <p
+            className="login-feedback"
+            data-status={feedback.status}
+            role={feedback.status === "error" ? "alert" : "status"}
+          >
+            {feedback.message}
+          </p>
+        )}
       </form>
     </section>
   );
@@ -89,15 +118,17 @@ function LoginPage() {
   const [activeRole, setActiveRole] = useState("student");
 
   return (
-    <main className="login-page">
-      <div className="login-content">
-        <UniversityIntro />
-        <RoleTabs activeRole={activeRole} onRoleChange={setActiveRole} />
-        <SignInForm activeRole={activeRole} />
-        <SupportCard />
-        <PageFooter />
-      </div>
-    </main>
+    <>
+      <main className="login-page">
+        <div className="login-content">
+          <UniversityIntro />
+          <RoleTabs activeRole={activeRole} onRoleChange={setActiveRole} />
+          <SignInForm activeRole={activeRole} />
+          <SupportCard />
+          <PageFooter />
+        </div>
+      </main>
+    </>
   );
 }
 

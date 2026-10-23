@@ -108,11 +108,32 @@ Request:
 }
 ```
 
-The response and authentication mechanism must be finalized before implementation.
+The endpoint uses bearer JWT authentication. On successful login, it issues an HS256-signed access token that expires after one hour. Clients must send it in the `Authorization: Bearer <token>` header for protected endpoints. The token is returned only in the login response; clients should keep it in memory and must not persist it in local storage.
 
-If using a secure cookie-based session, the server should set the session cookie and return appropriate user information. If using bearer tokens, document token issuance, expiration, refresh, and storage rules before implementation.
+Success response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "token": "<access-token>",
+    "tokenType": "Bearer",
+    "expiresIn": 3600,
+    "user": {
+      "id": "user-id",
+      "name": "Example Student",
+      "email": "student@example.com",
+      "role": "student"
+    }
+  }
+}
+```
+
+Invalid credentials return `401` with error code `INVALID_CREDENTIALS`. Invalid request fields return `400` with error code `VALIDATION_ERROR`. Login identifiers are normalized email addresses. Supported roles are `student`, `faculty`, and `admin`.
 
 Never return password hashes.
+
+The current Express/MongoDB implementation uses MongoDB ObjectId strings for user IDs; other API resources retain the ID format defined by their contracts.
 
 ### 5.2 Current User
 
@@ -343,4 +364,3 @@ Do not silently rename response fields, change status codes, or modify authentic
 This document establishes initial conventions and proposed endpoints. Before implementation, the relevant team leads must confirm the exact request and response schemas, permissions, and business rules.
 
 For larger APIs, maintain an OpenAPI specification so endpoints can be reviewed and tested consistently.
-
