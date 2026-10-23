@@ -75,6 +75,7 @@
   --shadow-floating:
     0 10px 15px -3px rgba(15, 37, 55, 0.08),
     0 4px 6px -4px rgba(15, 37, 55, 0.03);
+  --shadow-focus: 0 0 0 3px rgba(15, 37, 55, 0.1);
 }
 
 * {

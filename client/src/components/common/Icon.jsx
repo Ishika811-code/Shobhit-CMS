@@ -81,6 +81,43 @@ const iconPaths = {
             <path d="M4 13h3v6H5a2 2 0 0 1-2-2v-2a2 2 0 0 1 1-2Zm16 0h-3v6h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-1-2Zm-8 8h3" />
         </>
     ),
+    mail: (
+        <>
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m4 7 8 6 8-6" />
+        </>
+    ),
+    message: (
+        <>
+            <path d="M4 5h16v12H8l-4 3z" />
+            <path d="M8 10h.01M12 10h.01M16 10h.01" />
+        </>
+    ),
+    refresh: (
+        <>
+            <path d="M20 7v5h-5" />
+            <path d="M4 17v-5h5" />
+            <path d="M5.6 9A7 7 0 0 1 18 6l2 6M4 12l2 6a7 7 0 0 0 12.4-3" />
+        </>
+    ),
+    arrowRight: (
+        <>
+            <path d="M5 12h14" />
+            <path d="m13 6 6 6-6 6" />
+        </>
+    ),
+    location: (
+        <>
+            <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+            <circle cx="12" cy="10" r="2.5" />
+        </>
+    ),
+    badge: (
+        <>
+            <rect x="4" y="7" width="16" height="14" rx="2" />
+            <path d="M9 7V4h6v3m-5 5h4m-2-2v4" />
+        </>
+    ),
 };
 
 

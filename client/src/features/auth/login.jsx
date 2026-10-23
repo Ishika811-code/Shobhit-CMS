@@ -3,7 +3,7 @@ import { Icon } from "../../components/common/Icon";
 import { RoleTabs } from "../../components/common/RoleTabs";
 import { roles } from "../../utils/roles";
 import { clearAccessToken, login } from "../../services/auth";
-import "./login.css";
+import "./style/login.css";
 import { UniversityIntro } from "./UniversityIntro";
 import { SupportCard } from "./SupportCard";
 import { PageFooter } from "../../components/layout/PageFooter";
@@ -72,9 +72,7 @@ function SignInForm({ activeRole }) {
           <label className="field-label" htmlFor="portal-password">
             Portal Password
           </label>
-          <a href="mailto:it.support@shobhituniversity.ac.in?subject=Password%20reset">
-            Forgot / Reset?
-          </a>
+          <a href="/forgot-password">Forgot / Reset?</a>
         </div>
         <div className="input-wrap">
           <Icon name="lock" />

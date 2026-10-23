@@ -29,6 +29,52 @@ export async function login(credentials) {
   return result.data;
 }
 
+export async function requestPasswordReset(request) {
+  const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error("The server returned an invalid response.");
+  }
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.error?.message || "Unable to request a password reset.");
+  }
+
+  return result.data;
+}
+
+export async function resetPassword(request) {
+  const response = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
+
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    throw new Error("The server returned an invalid response.");
+  }
+
+  if (!response.ok || !result.success) {
+    throw new Error(result.error?.message || "Unable to reset your password.");
+  }
+
+  return result.data;
+}
+
 export function clearAccessToken() {
   accessToken = null;
 }

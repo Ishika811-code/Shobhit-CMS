@@ -1,25 +1,30 @@
 import { Icon } from '../common/Icon';
 
-export function TopBar() {
+export function TopBar({
+    title = "Institutional Sign In",
+    backHref = "/",
+    helpHref = "mailto:it.support@shobhituniversity.ac.in",
+    accountHref = "/",
+}) {
     return (
         <header className="topbar">
-            <button className="icon-button back-button" type="button" aria-label="Go back">
+            <a className="icon-button back-button" href={backHref} aria-label="Back to sign in">
                 <Icon name="back" />
-            </button>
+            </a>
             <div className="topbar-brand">
                 <span className="brand-mark"><Icon name="university" /></span>
                 <span className="topbar-title">
                     <span>SHOBHIT UNIV</span>
-                    <strong>Institutional Sign In</strong>
+                    <strong>{title}</strong>
                 </span>
             </div>
             <div className="topbar-actions">
-                <button className="icon-button help-button" type="button" aria-label="Help">
+                <a className="icon-button help-button" href={helpHref} aria-label="Contact helpdesk">
                     <Icon name="help" />
-                </button>
-                <button className="profile-button" type="button" aria-label="Account">
+                </a>
+                <a className="profile-button" href={accountHref} aria-label="Sign in">
                     <Icon name="user" />
-                </button>
+                </a>
             </div>
         </header>
     );
