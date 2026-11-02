@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #102333; font-synthesis: none; text-rendering: optimizeLegibility; }
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; background: #f6f8fd; }
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #8db9e8; outline-offset: 2px; }
+.field { display:block; width:100%; border:1px solid #e4eaf3; border-radius:12px; background:#f1f5ff; padding:14px 15px; color:#102333; font-size:14px; font-weight:500; }
+.field:focus { border-color:#8aa6d6; background:white; outline:none; box-shadow:0 0 0 3px #dce9ff; }
+.primary-button { display:inline-flex; align-items:center; justify-content:center; gap:9px; border:0; border-radius:11px; background:#102333; color:white; padding:14px 16px; font-size:13px; font-weight:800; transition:transform .15s, background .15s; }
+.primary-button:hover { background:#1d4058; }
+.primary-button:active { transform:scale(.99); }
+.secondary-button { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid #e2e8f0; border-radius:10px; background:white; color:#334155; padding:10px 13px; font-size:11px; font-weight:700; }
+.secondary-button:hover { background:#f8fafc; border-color:#cbd5e1; }
+.icon-button { position:relative; display:grid; height:36px; width:36px; place-items:center; border-radius:10px; color:#475569; }
+.icon-button:hover { background:#f1f5f9; }
+.nav-link { display:flex; width:100%; align-items:center; gap:12px; border-radius:12px; padding:12px 13px; color:#667085; text-align:left; font-size:13px; font-weight:650; transition:background .15s,color .15s; }
+.nav-link:hover { background:#f5f7fb; color:#102333; }
+.nav-link-active { background:#eaf0ff; color:#102333; }
+.event-hero { background:linear-gradient(90deg,rgba(7,21,34,.97) 0%,rgba(7,21,34,.87) 52%,rgba(7,21,34,.63) 100%),radial-gradient(ellipse at 80% 15%,#5c7694 0%,#243d54 42%,#071522 80%); }
+@media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior:auto!important; transition:none!important; } }
