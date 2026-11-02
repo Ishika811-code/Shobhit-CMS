@@ -1,0 +1,349 @@
+.login-page {
+  min-height: calc(100vh - 64px);
+  background: var(--color-canvas);
+  color: var(--color-text);
+}
+
+.login-content {
+  width: min(100% - 32px, 448px);
+  margin: 0 auto;
+  padding: 28px 0 32px;
+}
+
+.university-intro {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.university-emblem {
+  position: relative;
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  margin: 0 0 14px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 50%;
+  color: var(--color-academic-gold);
+  background: var(--color-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.university-emblem > svg {
+  width: 38px;
+  height: 38px;
+  stroke-width: 1.8;
+}
+
+.emblem-dot {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--color-canvas);
+  border-radius: 50%;
+  background: var(--color-academic-gold);
+}
+
+.portal-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-primary);
+  background: var(--color-surface);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+.portal-label > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-academic-gold);
+}
+
+.university-intro h1 {
+  margin: 10px 0 3px;
+  color: var(--color-primary-dark);
+  font-size: var(--font-size-headline-lg);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.university-motto {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sign-in-card {
+  padding: 22px 24px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.form-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.form-heading h2 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: var(--font-size-headline-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+
+.access-badge {
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.access-badge--student {
+  border-color: var(--color-student-border);
+  color: var(--color-student);
+  background: var(--color-student-surface);
+}
+
+.access-badge--faculty {
+  border-color: var(--color-faculty-border);
+  color: var(--color-faculty);
+  background: var(--color-faculty-surface);
+}
+
+.access-badge--staff {
+  border-color: var(--color-admin-border);
+  color: var(--color-admin);
+  background: var(--color-admin-surface);
+}
+
+.sign-in-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  margin-bottom: 6px;
+  color: var(--color-text);
+  font-size: var(--font-size-label-md);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.input-wrap {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border: 1px solid var(--color-input-border);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.input-wrap:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(15, 37, 55, 0.1);
+}
+
+.input-wrap > svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
+.input-wrap input {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  color: var(--color-text);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+}
+
+.input-wrap input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 1;
+}
+
+.password-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 6px;
+}
+
+.password-label-row .field-label {
+  margin: 0;
+}
+
+.password-label-row a {
+  color: var(--color-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.password-label-row a:hover,
+.support-card a:hover {
+  text-decoration: underline;
+}
+
+.password-toggle {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.password-toggle svg {
+  width: 19px;
+  height: 19px;
+}
+
+.submit-button {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 22px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-default);
+  color: #fff;
+  background: var(--color-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.submit-button:hover {
+  background: var(--color-primary-dark);
+}
+
+.submit-button:active {
+  transform: scale(0.98);
+}
+
+.submit-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.submit-button svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+}
+
+.login-feedback {
+  margin: 12px 0 0;
+  color: var(--color-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.login-feedback[data-status="success"] {
+  color: var(--color-student);
+}
+
+.support-card {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.support-card h2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.support-card h2 svg {
+  width: 17px;
+  height: 17px;
+  color: var(--color-secondary);
+}
+
+.support-card p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.support-card a {
+  color: var(--color-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 700px) {
+  .login-content {
+    padding-top: 36px;
+    padding-bottom: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .login-content {
+    width: min(100% - 28px, 448px);
+    padding-top: 20px;
+  }
+
+  .university-motto {
+    font-size: 12px;
+  }
+
+  .sign-in-card {
+    padding: 18px 16px 20px;
+  }
+}
