@@ -1,0 +1,1 @@
+{"expo":{"name":"Shobhit University","slug":"shobhit-university-cms","scheme":"shobhitcms","version":"1.0.0","orientation":"portrait","ios":{"bundleIdentifier":"in.edu.shobhit.cms"},"android":{"package":"in.edu.shobhit.cms","permissions":["RECEIVE_BOOT_COMPLETED","VIBRATE"]},"plugins":[["expo-notifications",{"icon":"./assets/notification-icon.png","color":"#17243b"}]]}}
