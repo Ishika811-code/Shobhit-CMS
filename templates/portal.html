@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ffffff" />
+    <title>Shobhit University | {{ active }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" id="sidebar" aria-label="Sidebar Navigation">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='shobhit-logo.png') }}" onerror="this.style.display='none'" alt="Shobhit Logo" />
+          <div>
+            <b>SHOBHIT</b>
+            <small>UNIVERSITY · GANGOH</small>
+          </div>
+          <button class="icon mobile-close" type="button" aria-label="Close menu" onclick="toggleSidebar(false)">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+
+        <div class="portal-tag">UNIVERSITY MANAGEMENT SYSTEM</div>
+
+        <div class="role-box">
+          <small>PORTAL PREVIEW</small>
+          <div>
+            {% for r in ['Student', 'Faculty', 'Admin'] %}
+            <a href="{{ url_for('switch_role', new_role=r) }}" class="role-btn {% if role == r %}chosen{% endif %}">
+              {{ r }}
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <nav>
+          {% for group in groups %}
+            {% set group_items = [] %}
+            {% for name, icon_name, cat in allowed_modules %}
+              {% if cat == group %}
+                {% set _ = group_items.append((name, icon_name)) %}
+              {% endif %}
+            {% endfor %}
+
+            {% if group_items %}
+            <section>
+              <small>{{ group }}</small>
+              {% for name, icon_name in group_items %}
+              <a href="{{ url_for('portal', module=name) }}" class="nav-link {% if active == name %}nav-active{% endif %}">
+                <i data-lucide="{{ icon_name }}"></i>
+                <span>{{ name }}</span>
+                {% if name == 'Announcements' %}<i></i>{% endif %}
+              </a>
+              {% endfor %}
+            </section>
+            {% endif %}
+          {% endfor %}
+        </nav>
+
+        <div class="side-bottom">
+          <div class="help">
+            <i data-lucide="help-circle"></i>
+            <b>University Helpdesk</b>
+            <p>Support for portal and campus services.</p>
+            <button type="button" onclick="showToast('Helpdesk contact details can be connected by the university.')">
+              Contact support ↗
+            </button>
+          </div>
+
+          <div class="side-user">
+            <div class="avatar">{{ user.avatar }}</div>
+            <div class="side-user-meta">
+              <b>{{ user.name }}</b>
+              <small>{{ user.id }}</small>
+            </div>
+            <button class="icon" type="button" aria-label="User options" onclick="togglePopover('profilePop', event)">
+              <i data-lucide="more-horizontal"></i>
+            </button>
+          </div>
+
+          <a href="{{ url_for('logout') }}" class="side-logout-btn">
+            <i data-lucide="log-out"></i>
+            <span>Sign out</span>
+          </a>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div class="topbar-left">
+            <button class="icon hamburger" type="button" aria-label="Open menu" onclick="toggleSidebar(true)">
+              <i data-lucide="menu"></i>
+            </button>
+            <div class="crumb"><span class="crumb-root">University Portal <span>/</span></span> <b>{{ active }}</b></div>
+          </div>
+
+          <div class="top-tools">
+            <form class="search desktop-search" method="GET" action="{{ url_for('portal', module=active) }}">
+              <i data-lucide="search"></i>
+              <input name="q" placeholder="Search records or modules" value="{{ query }}" />
+              {% if row_filter %}<input type="hidden" name="filter" value="{{ row_filter }}" />{% endif %}
+            </form>
+
+            <button class="icon bell" type="button" aria-label="Notifications" onclick="togglePopover('notifPop', event)">
+              <i data-lucide="bell"></i>
+              <i></i>
+            </button>
+
+            <form method="POST" action="{{ url_for('set_campus') }}">
+              <input type="hidden" name="current_module" value="{{ active }}" />
+              <select name="campus" aria-label="Select campus" onchange="this.form.submit()">
+                <option value="Gangoh" {% if campus == 'Gangoh' %}selected{% endif %}>Gangoh</option>
+                <option value="Saharanpur" {% if campus == 'Saharanpur' %}selected{% endif %}>Saharanpur</option>
+                <option value="All campuses" {% if campus == 'All campuses' %}selected{% endif %}>All campuses</option>
+              </select>
+            </form>
+
+            <button class="avatar top-avatar" type="button" aria-label="Account menu" onclick="togglePopover('profilePop', event)">
+              {{ user.avatar }}
+            </button>
+          </div>
+
+          <div class="pop notifications" id="notifPop" style="display: none;">
+            <b>Notifications</b>
+            <p>Examination schedule has been published.</p>
+            <p>Attendance records were updated.</p>
+            <p>Library due-date reminder.</p>
+          </div>
+
+          <div class="pop profile" id="profilePop" style="display: none;">
+            <b>{{ user.name }}</b>
+            <small>{{ user.id }}</small>
+            <button type="button" onclick="showToast('Profile settings are a preview feature.')">Account settings</button>
+            <a href="{{ url_for('logout') }}" class="signout-link">Sign out</a>
+          </div>
+        </header>
+
+        <div class="mobile-search-bar">
+          <form class="search" method="GET" action="{{ url_for('portal', module=active) }}">
+            <i data-lucide="search"></i>
+            <input name="q" placeholder="Search records or modules..." value="{{ query }}" />
+            {% if row_filter %}<input type="hidden" name="filter" value="{{ row_filter }}" />{% endif %}
+          </form>
+        </div>
+
+        <div class="content">
+          <div class="welcome">
+            <div>
+              <div class="eyebrow"><i></i> {{ role.upper() }} PORTAL · {{ campus.upper() }} CAMPUS</div>
+              <h1>
+                {% if active == 'Dashboard' %}
+                  Welcome back, {{ user.name.split(' ')[0] }}
+                {% else %}
+                  {{ active }}
+                {% endif %}
+              </h1>
+              <p>
+                {% if active == 'Dashboard' %}
+                  Your university activities and services in one place.
+                {% else %}
+                  Manage and review {{ active.lower() }} information.
+                {% endif %}
+              </p>
+            </div>
+
+            <div class="welcome-actions">
+              <a href="{{ url_for('export_csv', module=active, q=query, filter=row_filter) }}" class="secondary btn-link">
+                <i data-lucide="download"></i> Export
+              </a>
+              {% if active not in ['Dashboard', 'Settings'] %}
+              <button class="primary" type="button" onclick="toggleModal(true)">
+                <i data-lucide="plus"></i> Add record
+              </button>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if active == 'Dashboard' %}
+          <div class="stats">
+            <div>
+              <span>Enrolled students</span>
+              <i data-lucide="graduation-cap"></i>
+              <strong>{{ '1' if role == 'Student' else ('246' if role == 'Faculty' else '12,480') }}</strong>
+              <small>Across university campuses</small>
+            </div>
+            <div>
+              <span>Faculty & staff</span>
+              <i data-lucide="users"></i>
+              <strong>1,240</strong>
+              <small>Academic and administrative teams</small>
+            </div>
+            <div>
+              <span>Attendance today</span>
+              <i data-lucide="clipboard-check"></i>
+              <strong>{{ '92.4%' if role == 'Student' else '91.8%' }}</strong>
+              <small>Based on submitted records</small>
+            </div>
+            <div>
+              <span>Fee collection</span>
+              <i data-lucide="wallet"></i>
+              <strong>{{ 'Paid' if role == 'Student' else '₹8.4 Cr' }}</strong>
+              <small>{{ 'Current fee status' if role == 'Student' else 'Current session overview' }}</small>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <small>UNIVERSITY OVERVIEW</small>
+                  <h2>Campus activity</h2>
+                </div>
+                <a href="{{ url_for('portal', module='Reports & Analytics') }}" class="text-btn">View reports ↗</a>
+              </div>
+
+              <div class="campus-cards">
+                <div>
+                  <i data-lucide="building-2"></i>
+                  <b>Gangoh Campus</b>
+                  <strong>8,240</strong>
+                  <small>Students enrolled</small>
+                </div>
+                <div>
+                  <i data-lucide="building-2"></i>
+                  <b>Saharanpur Campus</b>
+                  <strong>4,240</strong>
+                  <small>Students enrolled</small>
+                </div>
+                <div>
+                  <i data-lucide="globe"></i>
+                  <b>Academic session</b>
+                  <strong>2026-27</strong>
+                  <small>Current session</small>
+                </div>
+              </div>
+
+              <div class="panel-head subhead">
+                <div>
+                  <small>ACADEMIC CALENDAR</small>
+                  <h2>Upcoming schedule</h2>
+                </div>
+                <a href="{{ url_for('portal', module='Timetable') }}" class="text-btn">Full timetable ↗</a>
+              </div>
+
+              {% set events = [
+                ('12 Nov', 'Internal assessment registration closes', 'Academic Cell'),
+                ('18 Nov', 'Mid-semester examinations begin', 'Examination Cell'),
+                ('25 Nov', 'Fee payment deadline', 'Finance Office')
+              ] %}
+              {% for date, title, office in events %}
+              <div class="event">
+                <b>{{ date }}</b>
+                <div>
+                  <strong>{{ title }}</strong>
+                  <small>{{ office }}</small>
+                </div>
+                <i data-lucide="clock-3"></i>
+              </div>
+              {% endfor %}
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <small>QUICK ACCESS</small>
+                  <h2>University services</h2>
+                </div>
+              </div>
+
+              <div class="quick-grid">
+                {% set quick_links = [
+                  ('Attendance', 'clipboard-check'),
+                  ('Fees & Payments', 'wallet'),
+                  ('Examinations', 'file-text'),
+                  ('Library', 'library'),
+                  ('Hostel', 'home'),
+                  ('Transport', 'bus'),
+                  ('Announcements', 'megaphone'),
+                  ('Messages', 'message-square')
+                ] %}
+                {% for qname, qicon in quick_links %}
+                <a href="{{ url_for('portal', module=qname) }}" class="quick-card">
+                  <i data-lucide="{{ qicon }}"></i>
+                  <span>{{ qname }}</span>
+                  <i data-lucide="arrow-up-right"></i>
+                </a>
+                {% endfor %}
+              </div>
+
+              <div class="notice">
+                <i data-lucide="megaphone"></i>
+                <div>
+                  <b>Important university notice</b>
+                  <p>Mid-semester examination schedule is available. Check the examinations section for details.</p>
+                  <a href="{{ url_for('portal', module='Announcements') }}" class="notice-btn">Read announcement ↗</a>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {% else %}
+          <section class="panel records-panel">
+            <div class="panel-head">
+              <div>
+                <small>{{ module_category.upper() }}</small>
+                <h2>{{ active }} records</h2>
+                <p>Review and manage the information available in this portal.</p>
+              </div>
+
+              <div class="record-actions">
+                <form class="filter" method="GET" action="{{ url_for('portal', module=active) }}">
+                  <i data-lucide="filter"></i>
+                  <input name="filter" placeholder="Filter this list" value="{{ row_filter }}" />
+                  {% if query %}<input type="hidden" name="q" value="{{ query }}" />{% endif %}
+                </form>
+
+                <a href="{{ url_for('export_csv', module=active, q=query, filter=row_filter) }}" class="secondary btn-link">
+                  <i data-lucide="download"></i> Export CSV
+                </a>
+
+                <button class="primary" type="button" onclick="toggleModal(true)">
+                  <i data-lucide="plus"></i> Add new
+                </button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    {% for h in headings %}
+                    <th>{{ h }}</th>
+                    {% endfor %}
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for r in filtered %}
+                  <tr>
+                    {% for val in r %}
+                    <td data-label="{{ headings[loop.index0] if loop.index0 < headings|length else 'Detail' }}">
+                      {% if loop.last %}
+                        {% set lower_val = val.lower() %}
+                        {% if 'paid' in lower_val or 'active' in lower_val or 'present' in lower_val or 'issued' in lower_val or 'verified' in lower_val %}
+                          <span class="status good">{{ val }}</span>
+                        {% elif 'pending' in lower_val or 'review' in lower_val or 'overdue' in lower_val %}
+                          <span class="status warn">{{ val }}</span>
+                        {% else %}
+                          <span class="status neutral">{{ val }}</span>
+                        {% endif %}
+                      {% else %}
+                        {{ val }}
+                      {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td data-label="Action">
+                      <button
+                        class="row-action"
+                        type="button"
+                        onclick="showToast('Record {{ r[0] }} selected. Connect the database API to open its full record.')"
+                      >
+                        <i data-lucide="eye"></i> View
+                      </button>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+
+              {% if not filtered %}
+              <div class="no-data">No records match your search. Try another keyword or add a record.</div>
+              {% endif %}
+            </div>
+
+            <div class="table-foot">
+              <span>Showing {{ filtered|length }} of {{ rows|length }} records</span>
+              <span>Campus: {{ campus }} · Session dataset</span>
+            </div>
+          </section>
+          {% endif %}
+
+          <footer>
+            © 2026 Shobhit University, Gangoh
+            <span>University Management Portal · Python Flask</span>
+          </footer>
+        </div>
+      </main>
+
+      <nav class="mobile-bottom-nav" aria-label="Quick Mobile Navigation">
+        <a href="{{ url_for('portal', module='Dashboard') }}" class="{% if active == 'Dashboard' %}active{% endif %}">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Home</span>
+        </a>
+        <a href="{{ url_for('portal', module='Attendance') }}" class="{% if active == 'Attendance' %}active{% endif %}">
+          <i data-lucide="clipboard-check"></i>
+          <span>Attendance</span>
+        </a>
+        <a href="{{ url_for('portal', module='Fees & Payments') }}" class="{% if active == 'Fees & Payments' %}active{% endif %}">
+          <i data-lucide="wallet"></i>
+          <span>Fees</span>
+        </a>
+        <a href="{{ url_for('portal', module='Announcements') }}" class="{% if active == 'Announcements' %}active{% endif %}">
+          <i data-lucide="megaphone"></i>
+          <span>Notices</span>
+        </a>
+        <button type="button" onclick="toggleSidebar(true)">
+          <i data-lucide="grid"></i>
+          <span>More</span>
+        </button>
+      </nav>
+
+      <button class="scrim" id="scrim" style="display: none;" aria-label="Close menu" onclick="toggleSidebar(false)"></button>
+
+      <div class="modal-backdrop" id="recordModal" style="display: none;">
+        <div class="modal">
+          <div class="modal-head">
+            <div>
+              <small>UNIVERSITY MANAGEMENT</small>
+              <h2>Add {{ active }} record</h2>
+            </div>
+            <button class="icon" type="button" aria-label="Close modal" onclick="toggleModal(false)">
+              <i data-lucide="x"></i>
+            </button>
+          </div>
+          <p class="modal-note">Enter the available details. Records are stored in your Flask session.</p>
+          <form method="POST" action="{{ url_for('add_record', module=active) }}">
+            <div class="form-grid">
+              {% for h in headings %}
+              <label>
+                {{ h }}
+                <input name="field_{{ loop.index0 }}" placeholder="Enter {{ h.lower() }}" />
+              </label>
+              {% endfor %}
+            </div>
+            <div class="modal-actions">
+              <button class="secondary" type="button" onclick="toggleModal(false)">Cancel</button>
+              <button class="primary" type="submit"><i data-lucide="check"></i> Save record</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      {% with messages = get_flashed_messages() %}
+        <div class="toast" id="toastBox" {% if not messages %}style="display: none;"{% endif %}>
+          <i data-lucide="check"></i>
+          <span id="toastText">{{ messages[0] if messages else '' }}</span>
+        </div>
+      {% endwith %}
+    </div>
+
+    <script>
+      lucide.createIcons();
+
+      function toggleSidebar(open) {
+        const sb = document.getElementById('sidebar');
+        const scrim = document.getElementById('scrim');
+        if (open) {
+          sb.classList.add('open');
+          scrim.style.display = 'block';
+          document.body.style.overflow = 'hidden';
+        } else {
+          sb.classList.remove('open');
+          scrim.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      }
+
+      function togglePopover(id, event) {
+        if (event) event.stopPropagation();
+        const target = document.getElementById(id);
+        const isHidden = target.style.display === 'none' || target.style.display === '';
+        document.getElementById('notifPop').style.display = 'none';
+        document.getElementById('profilePop').style.display = 'none';
+        if (isHidden) target.style.display = 'block';
+      }
+
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.pop')) {
+          document.getElementById('notifPop').style.display = 'none';
+          document.getElementById('profilePop').style.display = 'none';
+        }
+      });
+
+      function toggleModal(show) {
+        document.getElementById('recordModal').style.display = show ? 'flex' : 'none';
+        document.body.style.overflow = show ? 'hidden' : '';
+      }
+
+      let toastTimer;
+      function showToast(msg) {
+        const box = document.getElementById('toastBox');
+        document.getElementById('toastText').textContent = msg;
+        box.style.display = 'flex';
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          box.style.display = 'none';
+        }, 2800);
+      }
+
+      window.addEventListener('DOMContentLoaded', () => {
+        const box = document.getElementById('toastBox');
+        if (box && box.style.display !== 'none') {
+          setTimeout(() => { box.style.display = 'none'; }, 2800);
+        }
+      });
+    </script>
+  </body>
+</html>

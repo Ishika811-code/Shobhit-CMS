@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Shobhit University Gangoh College CMS student portal" />
+    <title>Shobhit University | CMS Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="login-shell">
+      <div class="login-visual">
+        <div class="login-brand">
+          <img src="{{ url_for('static', filename='shobhit-logo.png') }}" onerror="this.style.display='none'" alt="Shobhit University Logo" />
+          <div>
+            <b>SHOBHIT UNIVERSITY</b>
+            <small>GANGOH · UTTAR PRADESH</small>
+          </div>
+        </div>
+        <div class="login-hero-copy">
+          <span>ONE UNIVERSITY. MANY POSSIBILITIES.</span>
+          <h1>Your campus,<br /><em>connected.</em></h1>
+          <p>Access academics, attendance, examinations and university services through one secure portal.</p>
+          <div class="login-feature-row">
+            <span>✦ Academic services</span>
+            <span>✦ Campus updates</span>
+            <span>✦ Student support</span>
+          </div>
+        </div>
+        <div class="login-visual-foot">SHOBHIT UNIVERSITY · UNIVERSITY MANAGEMENT PORTAL</div>
+      </div>
+
+      <div class="login-panel-wrap">
+        <form class="login-card" method="POST" action="{{ url_for('login') }}">
+          <div class="mobile-login-logo">
+            <img src="{{ url_for('static', filename='shobhit-logo.png') }}" onerror="this.style.display='none'" alt="Shobhit University Logo" />
+            <div>
+              <b>SHOBHIT UNIVERSITY</b>
+              <small>GANGOH · UTTAR PRADESH</small>
+            </div>
+          </div>
+          <div class="login-kicker">WELCOME TO YOUR CAMPUS</div>
+          <h2>Sign in to your portal</h2>
+          <p class="login-subtitle">Use your university account to continue.</p>
+
+          <label class="login-label">
+            Portal type
+            <select name="role" id="roleSelect" onchange="updatePlaceholder()">
+              <option value="Student" {% if selected_role == 'Student' %}selected{% endif %}>Student</option>
+              <option value="Faculty" {% if selected_role == 'Faculty' %}selected{% endif %}>Faculty</option>
+              <option value="Admin" {% if selected_role == 'Admin' %}selected{% endif %}>Admin</option>
+            </select>
+          </label>
+
+          <label class="login-label">
+            University ID or email
+            <input
+              id="loginIdInput"
+              name="login_id"
+              autocomplete="username"
+              value="{{ login_id }}"
+              placeholder="e.g. SHU-2023-CS089"
+            />
+          </label>
+
+          <label class="login-label">
+            Password
+            <div class="password-wrap">
+              <input
+                id="passwordInput"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+              />
+              <button type="button" id="togglePwdBtn" onclick="togglePassword()">Show</button>
+            </div>
+          </label>
+
+          <div class="login-error" id="loginError" {% if not error %}style="display:none"{% endif %}>
+            {{ error or '' }}
+          </div>
+
+          <div class="login-options">
+            <label><input type="checkbox" name="remember" /> Remember me</label>
+            <button type="button" onclick="showForgotPassword()">Forgot password?</button>
+          </div>
+
+          <button class="login-submit" type="submit">Sign in <span>→</span></button>
+
+          <div class="login-security">♢ &nbsp; Your university account is intended for authorised use only.</div>
+          <div class="login-demo-note">
+            <b>Flask portal preview</b><br />
+            This login screen is a demonstration. Any non-empty ID and password will open the selected portal. Real authentication should be connected to your database backend.
+          </div>
+        </form>
+        <div class="login-copyright">© 2026 Shobhit University, Gangoh</div>
+      </div>
+    </div>
+
+    <script>
+      function togglePassword() {
+        const input = document.getElementById('passwordInput');
+        const btn = document.getElementById('togglePwdBtn');
+        if (input.type === 'password') {
+          input.type = 'text';
+          btn.textContent = 'Hide';
+        } else {
+          input.type = 'password';
+          btn.textContent = 'Show';
+        }
+      }
+
+      function updatePlaceholder() {
+        const role = document.getElementById('roleSelect').value;
+        const input = document.getElementById('loginIdInput');
+        input.placeholder = role === 'Student' ? 'e.g. SHU-2023-CS089' : 'Enter your university ID';
+      }
+
+      function showForgotPassword() {
+        const err = document.getElementById('loginError');
+        err.textContent = 'Please contact the University IT Helpdesk to reset your password.';
+        err.style.display = 'block';
+      }
+    </script>
+  </body>
+</html>
