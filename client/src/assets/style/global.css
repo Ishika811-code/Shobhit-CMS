@@ -1,0 +1,324 @@
+:root {
+  font-family: var(--font-family-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  color: var(--color-text);
+  background: var(--color-canvas);
+
+  --font-family-sans: "Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif;
+  --font-size-display-lg: 32px;
+  --font-weight-display-lg: 800;
+  --line-height-display-lg: 40px;
+  --letter-spacing-display-lg: -0.02em;
+  --font-size-headline-lg: 26px;
+  --font-weight-headline-lg: 700;
+  --line-height-headline-lg: 34px;
+  --font-size-headline-md: 20px;
+  --font-size-headline-sm: 18px;
+  --font-size-body-lg: 16px;
+  --font-size-body-md: 14px;
+  --font-size-body-sm: 13px;
+  --font-size-label-lg: 14px;
+  --font-size-label-md: 12px;
+  --font-size-label-sm: 11px;
+
+  --color-primary: #0f2537;
+  --color-primary-dark: #000f1d;
+  --color-secondary: #8b1e3f;
+  --color-academic-gold: #d4af37;
+  --color-canvas: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-dim: #cbdbf5;
+  --color-surface-bright: #f8f9ff;
+  --color-surface-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-text: #0b1c30;
+  --color-on-primary: #ffffff;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-outline: #74777d;
+  --color-outline-variant: #c3c7cd;
+  --color-input-border: #cbd5e1;
+  --color-error: #ba1a1a;
+  --color-error-surface: #ffdad6;
+  --color-inverse-surface: #213145;
+  --color-inverse-text: #eaf1ff;
+
+  --color-student: #047857;
+  --color-student-surface: #ecfdf5;
+  --color-student-border: #a7f3d0;
+  --color-faculty: #3730a3;
+  --color-faculty-surface: #eef2ff;
+  --color-faculty-border: #c7d2fe;
+  --color-admin: #b45309;
+  --color-admin-surface: #fffbeb;
+  --color-admin-border: #fde68a;
+
+  --radius-sm: 4px;
+  --radius-default: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --shadow-card:
+    0 1px 3px rgba(15, 37, 55, 0.04),
+    0 1px 2px rgba(15, 37, 55, 0.02);
+  --shadow-floating:
+    0 10px 15px -3px rgba(15, 37, 55, 0.08),
+    0 4px 6px -4px rgba(15, 37, 55, 0.03);
+  --shadow-focus: 0 0 0 3px rgba(15, 37, 55, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  font-size: var(--font-size-body-md);
+  line-height: 1.4;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.topbar {
+  display: flex;
+  width: 100%;
+  min-height: 64px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px max(16px, calc((100vw - 1120px) / 2));
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: 0 4px 8px rgba(15, 37, 55, 0.04);
+}
+
+.icon-button,
+.profile-button {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  color: var(--color-primary);
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-default);
+}
+
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+.topbar-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: var(--radius-default);
+  color: var(--color-academic-gold);
+  background: var(--color-primary);
+}
+
+.brand-mark svg {
+  width: 22px;
+  height: 22px;
+}
+
+.topbar-title {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.topbar-title span {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.topbar-title strong {
+  color: var(--color-text);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.help-button {
+  color: var(--color-text-muted);
+}
+
+.profile-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--color-surface);
+  background: var(--color-primary);
+}
+
+.profile-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.role-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  margin: 24px 0 16px;
+  padding: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-low);
+}
+
+.role-tab {
+  display: flex;
+  min-width: 0;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 5px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-default);
+  color: var(--color-text-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.role-tab svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+}
+
+.role-tab--student.is-active {
+  border-color: var(--color-student-border);
+  color: var(--color-student);
+  background: var(--color-student-surface);
+}
+
+.role-tab--faculty.is-active {
+  border-color: var(--color-faculty-border);
+  color: var(--color-faculty);
+  background: var(--color-faculty-surface);
+}
+
+.role-tab--staff.is-active {
+  border-color: var(--color-admin-border);
+  color: var(--color-admin);
+  background: var(--color-admin-surface);
+}
+
+.page-footer {
+  margin-top: 20px;
+  color: var(--color-text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.page-footer span {
+  display: block;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 3px;
+}
+
+@media (max-width: 420px) {
+  .topbar {
+    gap: 8px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .topbar-title strong {
+    font-size: 14px;
+  }
+
+  .topbar-title span {
+    font-size: 10px;
+  }
+
+  .topbar-actions {
+    gap: 6px;
+  }
+
+  .role-tabs {
+    gap: 2px;
+    margin-top: 20px;
+    padding: 3px;
+  }
+
+  .role-tab {
+    gap: 5px;
+    padding-right: 3px;
+    padding-left: 3px;
+    font-size: 11px;
+  }
+
+  .role-tab svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
