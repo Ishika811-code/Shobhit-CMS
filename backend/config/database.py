@@ -1,4 +1,4 @@
-
+import mysql.connector
 import os
 import pymysql
 from dotenv import load_dotenv
@@ -8,12 +8,13 @@ load_dotenv()
 
 
 def get_db_connection():
-    required_settings = [
-        "DB_HOST",
-        "DB_USER",
-        "DB_PASSWORD",
-        "DB_NAME"
-    ]
+    return mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="",
+        database="cms_db"
+    )
+    
 
     missing = [
         setting for setting in required_settings
